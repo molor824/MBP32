@@ -1,5 +1,4 @@
 from peekable import *
-from try_iter import *
 
 class Token:
     pass
@@ -47,28 +46,20 @@ class Lexer:
             if c.isalpha() or c == '_':
                 start = i
                 end = i + 1
-                while True:
-                    result = try_peek(self.source_iter)
-                    if result is None:
-                        break
-                    c = result[1]
-                    if not c.isalnum() and c != '_':
-                        break
-                    end += 1
-                    next(self.source_iter)
+                try:
+                    while True:
+                        i, _ = self.source_iter.next_if(lambda c: c[1].isalnum() or c[1] == '_')
+                        end = i + 1
+                except StopIteration: pass
                 return Ident(self.source[start:end])
             if c.isdigit():
                 start = i
                 end = i + 1
-                while True:
-                    result = try_peek(self.source_iter)
-                    if result is None:
-                        break
-                    c = result[1]
-                    if not c.isdigit():
-                        break
-                    end += 1
-                    next(self.source_iter)
+                try:
+                    while True:
+                        i, _ = self.source_iter.next_if(lambda c: c[1].isdigit())
+                        end = i + 1
+                except StopIteration: pass
                 return Integer(self.source[start:end])
             length = min(self.MAX_LEN + i, len(self.source))
             for i1 in range(length, i, -1):
@@ -78,4 +69,4 @@ class Lexer:
                         next(self.source_iter)
                     return Symbol(symbol)
             raise SyntaxError(f"Invalid character: {c!r}")
-        raise StopIteration
+        raise StopIteration()
