@@ -1,0 +1,152 @@
+MBP32 instruction format
+
+[a:b] - instruction bits from index a to index b (exclusive)
+[a] - instruction bit in index a
+$ident - argument
+
+# this is a comment
+
+if ident - checks if instruction matches the identified description
+elif ident - if it doesn't match, then check if it matches this description
+else ident - if it doesn't match, then its guaranteed to match this description
+
+(ident1 ? expr : ident2 ? expr : ...) - if instruction matches one of the identified descriptions, then the expression after it is valid
+ident? - if instruction has the identified description, then 1 else 0
+
+Numbers are in binary by default.
+
+if arithmetic:
+    # all arithmetic operations require rd and rs1 and rs2 or immediate
+    # all possible numeric operations:
+    # add, sub, shl, shr, sra
+    # all numeric operations can have a carry mode
+    # addition adds a carry bit
+    # subtraction subtracts an inverted carry bit
+    # shift register inserts a carry bit to the new bit (except sra)
+    # shift registers actually have a 32 bits of carry
+    # all possible logical operations:
+    # and, or, xor, xnor
+    # not is unnecessary to be implemented because 'xor rd, rs1, 0' serves the same purpose as not
+    # xnor is implemented simply because of the way the operation works
+    [0:2] = 00
+    [28:32] = $rd
+    [24:28] = $rs1
+    if register:
+        [2] = 0
+        [20:24] = $rs2
+    else immediate:
+        [2] = 1
+        [8:24] = $imm
+    if numeric:
+        [3] = 0
+        [4] = addition ? 0 : shift ? 1
+        [5] = opposite? # turns add to sub, shl to shr
+        [6] = carry?
+        if shift:
+            [7] = arithmetic?
+    else logical:
+        [3] = 1
+        [4] = and ? 0 : xor ? 1
+        [5] = opposite? # inverts the output (and to or, xor to xnor)
+elif memory:
+    [0:2] = 01
+    if load: # load to register
+        # every load instruction has rd
+        [2] = 0
+        [28:32] = $rd
+        if immediate: # load value to register
+            [3:5] = 00
+            [12:28] = $imm
+            [5] = upper ? 1 : lower ? 0 # is the immediate value upper or lower 16 bit?
+        elif memory: # load from memory
+            [3:5] = 01
+            # when loading from memory, rs1 and immediate values are used
+            [24:28] = $rs1
+            [8:24] = $imm
+            [4:6] = 8bit ? 00 : 16bit ? 01 : 32bit ? 10
+            [6] = signed? # if signed, then the sign bit extends
+        else move: # move from 1 register to other
+            [3] = 1
+            # rs1, rs2
+            [24:28] = $rs1
+            [20:24] = $rs2
+            # 32bit register is divided into 4 8bit sections
+            # first you read the section you want to
+            [4:12] = read_destination
+            # and then write to the section you want to
+            [12:20] = write_destination
+            # for example
+            # 00 01 10 11 00 01 10 11 - copy as normal
+            # 00 01 10 11 11 10 01 00 - swap 4th with 1st and 2nd with 3rd
+    if store: # store to memory
+        # every store instruction has rd and immediate (for offset)
+        [2] = 1
+        [28:32] = $rd
+        [12:28] = $imm
+        if immediate:
+            [3] = 0
+            [4:12] = $imm1 # other immediate value to store
+        else register:
+            [3] = 1
+            [8:12] = $rs1 # register to store
+            [4:6] = 8bit ? 00 : 16bit ? 01 : 32bit ? 10
+            [6] = signed? # if signed, then the sign bit is kept
+elif condition:
+    [0:2] = 10
+    # Filter that filters out the result after comparing 2 numbers.
+    # 010 a == b
+    # 101 a != b
+    # 100 a < b
+    # 001 a > b
+    # 110 a <= b
+    # 011 a >= b
+    # However, this leaves 111 state to be always true and 000 state to be always false. Since these are unnecessary for comparison, we can use it for other purposes.
+    # 111 regular jump
+    # 000 jump and link
+    [2:5] = conditional_filter
+    if jump:
+        [5] = 0
+        # Jumping requires immediate value as an offset
+        [16:32] = $imm
+        if [2:5] == 000: # since this is false all the time, we can reuse this for the jump and link instruction
+            if absolute:
+                [6] = 1
+                [12:16] = $rd # destination register to jump
+            else relative:
+                [6] = 0
+            [8:12] = $rs1 # register for storing the program counter
+        elif [2:5] == 111: # since this is true all the time, its just a regular jump, we can omit the operands
+            if absolute:
+                [6] = 1
+                [12:16] = $rd
+            else relative:
+                [6] = 0
+        else: # conditional jump
+            [12:16] = $rs1
+            [8:12] = $rs2
+            [6] = signed? # if signed then comparison will consider the sign bit
+    else value:
+        # instead of jumping when the condition is true, store the boolean value in register
+        [5] = 1
+        [28:32] = $rd
+        [24:28] = $rs1
+        if immediate: # pretty much like an arithmetic instruction
+            [6] = 1
+            [8:24] = $imm
+        else register:
+            [6] = 0
+            [20:24] = $rs2
+else others:
+    [0:2] = 11
+    if halt: # halts the entire processor
+        [2] = 0
+
+Registers:
+Special registers:
+rz(0xf) - constant zero register (cannot be written)
+rpc(0xe) - program counter register (incremented by 4 for each instruction)
+
+General purpose registers:
+rsp(0xd) - stack pointer register
+rjl(0xc) - jump and link register (default register to store program counter during JAL instruction)
+r0-11(0x0-0xb) - general purpose registers
