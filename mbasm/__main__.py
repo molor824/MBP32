@@ -1,9 +1,10 @@
 import sys
 from lexer import Lexer
+from astparser import Parser
 
 HELP_DESC = (
 """
-Usage: mbc [files] [options]
+Usage: mbasm [files] [options]
 Options:
   -h, --help          Show this message and exit
   -d, --objdump       Prints the compiled assembly code
@@ -52,9 +53,16 @@ def main():
     for file in input_files:
         file.close()
     
-    lexer = Lexer(source)
-    for token in lexer:
-        print(token)
+    try:
+        lexer = Lexer(source)
+        parser = Parser(lexer)
+
+        nodes = parser.parse()
+
+        for node in nodes:
+            print(node)
+    except SyntaxError as err:
+        print_error(err.msg)
 
 if __name__ == '__main__':
     main()
