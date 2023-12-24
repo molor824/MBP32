@@ -50,7 +50,7 @@ def set_if(condition: int, signed: bool, isimmediate: bool, rs1: int, rs2: int, 
 
 def main():
     hexcode = [NOP] * 2
-    hexcode.append(jump(True, False, 8 * 4, ZERO, RJL))
+    hexcode.append(jump(True, False, 8, ZERO, RJL))
     hexcode.append(NOP)
     hexcode.append(jump(False, True, 0, ZERO))
 
@@ -61,7 +61,7 @@ def main():
     print('\n'.join(hex(h) for h in hexcode))
 
     path = 'hexcode.bin'
-    np.array(hexcode, dtype=np.uint32).tofile(path, sep='', format='>u4')
+    np.array(hexcode, dtype=np.uint32).byteswap().tofile(path)
 
 if __name__ == "__main__":
     main()
