@@ -960,7 +960,7 @@
     <a name="appearance" val="logisim_evolution"/>
     <a name="circuit" val="main"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
-    <a name="simulationFrequency" val="8.0"/>
+    <a name="simulationFrequency" val="16.0"/>
     <comp lib="0" loc="(130,90)" name="Clock"/>
     <comp lib="0" loc="(150,410)" name="Pin">
       <a name="appearance" val="classic"/>
