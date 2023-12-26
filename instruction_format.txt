@@ -51,8 +51,7 @@ if arithmetic:
             [7] = arithmetic?
     else logical:
         [3] = 1
-        [4] = and ? 0 : xor ? 1
-        [5] = opposite? # inverts the output (and to or, xor to xnor)
+        [4:5] = and ? 00 : or ? 01 : xor ? 10 : not ? 11
 elif memory:
     [0:2] = 01
     if load: # load to register
