@@ -54,37 +54,27 @@ if arithmetic:
         [4:5] = and ? 00 : or ? 01 : xor ? 10 : not ? 11
 elif memory:
     [0:2] = 01
-    if load: # load to register
-        # every load instruction has rd
+    if store: # store to register
         [2] = 0
         [28:32] = $rd
-        if immediate: # load value to register
-            [3:5] = 00
+        if immediate: # store value to register $rd = $imm
+            [3] = 0
+            [4] = 0
             [8:24] = $imm
             [5] = upper ? 1 : lower ? 0 # is the immediate value upper or lower 16 bit?
-        elif memory: # load from memory
-            [3:5] = 01
-            # when loading from memory, rs1 and immediate values are used
+        elif memory: # store from memory $rd = M[$imm + $rs1]
+            [3] = 0
+            [4] = 1
             [24:28] = $rs1
             [8:24] = $imm
             [4:6] = 32bit ? 00 : 16bit ? 01 : 8bit ? 10 : 8bit ? 11
             [6] = signed? # if signed, then the sign bit extends
-        else move: # move from 1 register to other
+        else move: # move from 1 register to other $rd = $rs1
             [3] = 1
-            # $rd = $rs1
             [24:28] = $rs1
-            # 32bit register is divided into 4 8bit sections
-            # first you read the section you want to
-            [8:16] = read_destination
-            # and then write to the section you want to
-            [16:24] = write_destination
-            # for example
-            # 00 01 10 11 00 01 10 11 - copy as normal
-            # 00 01 10 11 11 10 01 00 - swap 4th with 1st and 2nd with 3rd
-    if store: # store to memory
-        # every store instruction has rd and immediate (for offset)
+    if load: # load to memory M[$rd+$imm] = $rs1 or $imm2
         [2] = 1
-        [28:32] = $rd # destination register for storing into the address
+        [28:32] = $rd # destination register of memory address
         [8:24] = $imm # offset
         if immediate:
             [3] = 0
@@ -92,7 +82,7 @@ elif memory:
             [4:8] = $imm1[0:4] # lower half of second immediate
         else register:
             [3] = 1
-            [24:28] = $rs1 # source register to store
+            [24:28] = $rs1 # source register to load from
             [4:6] = 32bit ? 00 : 16bit ? 01 : 8bit ? 10 : 8bit ? 11
             [6] = signed? # if signed then sign bit is extended
 elif condition:
@@ -138,10 +128,10 @@ elif condition:
         [12:16] = $rs1
         if immediate: # pretty much like an arithmetic instruction
             [6] = 1
-            [16:32] = $imm
+            [8:24] = $imm
         else register:
             [6] = 0
-            [16:20] = $rs2
+            [20:24] = $rs2
 else others:
     [0:2] = 11
     if nop: # do nothing
