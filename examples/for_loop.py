@@ -1,11 +1,15 @@
-from hex_gen import *
-import numpy as np
+from instructions import *
 
-hexcode = np.full(0x100, NOP, dtype=np.uint32)
-hexcode[0] = add(True, False, 0, immediate=10)
-hexcode[1] = jump_if(COND_LE, True, 10, 0)
-hexcode[2] = sub(True, False, 0, 0, immediate=1)
-hexcode[3] = jump(False, -2)
-hexcode[11] = HALT
+loop_amount = 10
+def main():
+    hexcode = []
+    hexcode.append(stri(False, 0, loop_amount))
+    hexcode.append(jmpif(COND_LE, True, 3, 0))
+    hexcode.append(subi(0, 0, 1))
+    hexcode.append(jumpr(-2))
+    hexcode.append(HALT)
 
-hexcode.byteswap().tofile("forloop.bin")
+    write_to_file(hexcode, 'forloop.bin')
+
+if __name__ == "__main__":
+    main()

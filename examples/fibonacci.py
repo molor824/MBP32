@@ -1,23 +1,24 @@
-from hex_gen import *
-import numpy as np
+from instructions import *
 
 iter_count = 90
 
-hexcode = np.full(0x100, NOP, dtype=np.uint32)
-hexcode[0] = add(True, False, 0, immediate=iter_count)
-hexcode[1] = add(True, False, 1, immediate=0)
-hexcode[2] = add(True, False, 2, immediate=0)
-hexcode[3] = add(True, False, 3, immediate=1)
-hexcode[4] = add(True, False, 4, immediate=0)
-hexcode[5] = jump_if(COND_LE, True, 9, 0)
-hexcode[6] = add(False, False, 5, 1, 3)
-hexcode[7] = add(False, True, 6, 2, 4)
-hexcode[8] = add(True, False, 1, 3)
-hexcode[9] = add(True, False, 2, 4)
-hexcode[10] = add(True, False, 3, 5)
-hexcode[11] = add(True, False, 4, 6)
-hexcode[12] = sub(True, False, 0, 0, immediate=1)
-hexcode[13] = jump(False, -8)
-hexcode[14] = HALT
+def main():
+    hexcode = []
+    hexcode.append(stri(False, 0, iter_count))
+    hexcode.append(stri(False, 1, 0))
+    hexcode.append(stri(False, 3, 1))
+    hexcode.append(jmpif(COND_LE, True, 9, 0))
+    hexcode.append(add(5, 1, 3))
+    hexcode.append(add(6, 2, 4, True))
+    hexcode.append(mov(1, 3))
+    hexcode.append(mov(2, 4))
+    hexcode.append(mov(3, 5))
+    hexcode.append(mov(4, 6))
+    hexcode.append(subi(0, 0, imm=1))
+    hexcode.append(jumpr(-8))
+    hexcode.append(HALT)
 
-hexcode.byteswap().tofile("fibonacci.bin")
+    write_to_file(hexcode, 'fibonacci.bin')
+
+if __name__ == "__main__":
+    main()
