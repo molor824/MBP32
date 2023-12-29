@@ -71,9 +71,7 @@
     <tool lib="8" name="Wiring Tool"/>
     <tool lib="8" name="Text Tool"/>
     <sep/>
-    <tool lib="0" name="Pin">
-      <a name="radix" val="16"/>
-    </tool>
+    <tool lib="0" name="Pin"/>
     <tool lib="0" name="Pin">
       <a name="facing" val="west"/>
       <a name="output" val="true"/>
@@ -1592,7 +1590,7 @@
     <a name="appearance" val="logisim_evolution"/>
     <a name="circuit" val="main"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
-    <a name="simulationFrequency" val="1.0"/>
+    <a name="simulationFrequency" val="2048000.0"/>
     <comp lib="0" loc="(1090,460)" name="Bit Extender">
       <a name="in_width" val="32"/>
       <a name="type" val="zero"/>
@@ -1611,9 +1609,7 @@
       <a name="addrWidth" val="16"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 16 32
-a01 d0000202 80000003 ee001004 defff80d efffc0d 10000201 1000040e
-defff811 eefff004 d00005e ffff04 d0fff702 efff40d efffc11 fffe04
-d0fff302 1efff411 100000 defff811 eefff004 d00005e
+104 ffff1e
 </a>
       <a name="dataWidth" val="32"/>
     </comp>

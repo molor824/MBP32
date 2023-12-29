@@ -1,6 +1,6 @@
 from instructions import *
 
-loop_amount = 10
+loop_amount = 1_000_000
 def main():
     hexcode = []
     hexcode.append(stri(False, 0, loop_amount))
