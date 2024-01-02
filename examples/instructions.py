@@ -17,11 +17,13 @@ NOP = 0b11
 HALT = 0b11 | (1 << 31)
 
 S32 = 0b100
-S16 = 0b101
-S8 = 0b110
+S24 = 0b101
+S16 = 0b110
+S8 = 0b111
 U32 = 0b000
-U16 = 0b001
-U8 = 0b010
+U24 = 0b001
+U16 = 0b010
+U8 = 0b011
 
 def get_imm(imm: int):
     return (int(imm) & 0xffff) << 8
@@ -42,14 +44,14 @@ def shr(rd = RZ, rs1 = RZ, rs2 = RZ, carry = False):
     return shl(rd, rs1, rs2, carry) | 1 << 5
 def sha(rd = RZ, rs1 = RZ, rs2 = RZ, carry = False):
     return shl(rd, rs1, rs2, carry) | 1 << 7
-def _and(rd = RZ, rs1 = RZ, rs2 = RZ):
+def bitand(rd = RZ, rs1 = RZ, rs2 = RZ):
     return ARITHMETICS | 1 << 3 | get_rd(rd) | get_rs1(rs1) | get_rs2(rs2)
-def _or(rd = RZ, rs1 = RZ, rs2 = RZ):
-    return _and(rd, rs1, rs2) | 0b01 << 4
-def _xor(rd = RZ, rs1 = RZ, rs2 = RZ):
-    return _and(rd, rs1, rs2) | 0b10 << 4
-def _not(rd = RZ, rs1 = RZ):
-    return _and(rd, rs1) | 0b11 << 4
+def bitor(rd = RZ, rs1 = RZ, rs2 = RZ):
+    return bitand(rd, rs1, rs2) | 0b01 << 4
+def bitxor(rd = RZ, rs1 = RZ, rs2 = RZ):
+    return bitand(rd, rs1, rs2) | 0b10 << 4
+def bitnot(rd = RZ, rs1 = RZ):
+    return bitand(rd, rs1) | 0b11 << 4
 def addi(rd = RZ, rs1 = RZ, imm = 0, carry = False):
     return ARITHMETICS | get_rd(rd) | get_rs1(rs1) | get_imm(imm) | 1 << 2 | bool(carry) << 6
 def subi(rd = RZ, rs1 = RZ, imm = 0, carry = False):
@@ -60,22 +62,20 @@ def shri(rd = RZ, rs1 = RZ, imm = 0, carry = False):
     return shli(rd, rs1, imm, carry) | 1 << 5
 def shai(rd = RZ, rs1 = RZ, imm = 0, carry = False):
     return shli(rd, rs1, imm, carry) | 1 << 7
-def _andi(rd = RZ, rs1 = RZ, imm = 0):
+def bitandi(rd = RZ, rs1 = RZ, imm = 0):
     return ARITHMETICS | 1 << 3 | get_rd(rd) | get_rs1(rs1) | get_imm(imm)
-def _ori(rd = RZ, rs1 = RZ, imm = 0):
-    return _andi(rd, rs1, imm) | 0b01 << 4
-def _xori(rd = RZ, rs1 = RZ, imm = 0):
-    return _andi(rd, rs1, imm) | 0b10 << 4
-def stri(upper = False, rd = RZ, imm = 0):
-    return MEMORY | get_rd(rd) | get_imm(imm) | bool(upper) << 5
+def bitori(rd = RZ, rs1 = RZ, imm = 0):
+    return bitandi(rd, rs1, imm) | 0b01 << 4
+def bitxori(rd = RZ, rs1 = RZ, imm = 0):
+    return bitandi(rd, rs1, imm) | 0b10 << 4
+def stri(signed = False, rd = RZ, imm = 0):
+    return MEMORY | get_rd(rd) | get_imm(imm) | bool(signed) << 6
 def strm(size = U32, rd = RZ, rs1 = RSP, imm = 0):
-    return MEMORY | 1 << 4 | get_rd(rd) | get_rs1(rs1) | get_imm(imm) | (int(size) & 0b111) << 4
+    return MEMORY | 1 << 3 | get_rd(rd) | get_rs1(rs1) | get_imm(imm) | (int(size) & 0b111) << 4
 def mov(rd = RZ, rs1 = RZ):
-    return MEMORY | 1 << 3 | get_rd(rd) | get_rs1(rs1)
-def loadi(rs1 = RSP, imm = 0, imm1 = 0):
-    return MEMORY | 1 << 2 | get_rs1(rs1) | get_imm(imm) | (int(imm1) & 0xf) << 4 | (int(imm1) & 0xf0) << 20
-def loadr(size = U32, rs1 = RSP, imm = 0, rd = RZ):
-    return MEMORY | 1 << 2 | 1 << 3 | get_rd(rd) | get_imm(imm) | get_rs1(rs1) | (int(size) & 0b111) << 4
+    return add(rd, rs1)
+def load(size = U32, rs1 = RSP, imm = 0, rd = RZ):
+    return MEMORY | 1 << 2 | get_rd(rd) | get_imm(imm) | get_rs1(rs1) | (int(size) & 0b111) << 4
 def jumpr(imm = 0):
     return CONDITIONAL | 0b111 << 2 | get_imm(imm)
 def jumpa(rs1 = RSP, imm = 0):
@@ -95,6 +95,12 @@ import struct
 
 def write_to_file(instructions: list[int], filepath: str):
     file = open(filepath, 'wb')
-    file.write(struct.pack(">{}I".format(len(instructions)), *instructions))
+
+    print("hex code:")
+    
+    for i in instructions:
+        print(f"{hex(i & 0xffffffff)[2:]:0>8}")
+        packed = struct.pack(">I", i)
+        file.write(packed)
 
     file.close()

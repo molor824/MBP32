@@ -32,12 +32,12 @@ endif:
 
 def main():
     hexcode = []
-    hexcode.append(stri(False, 0, 10))
+    hexcode.append(stri(False, 0, 8))
     hexcode.append(jalr(imm=2))
     hexcode.append(HALT)
     hexcode.append(addi(RSP, RSP, 16))
-    hexcode.append(loadr(U32, RSP, -8, RJL))
-    hexcode.append(loadr(U32, RSP, -4, 0))
+    hexcode.append(load(U32, RSP, -8, RJL))
+    hexcode.append(load(U32, RSP, -4, 0))
     hexcode.append(stri(False, 1, 2))
     hexcode.append(jmpif(COND_GE, False, 4, 0, 1))
     hexcode.append(strm(U32, RJL, RSP, -8))
@@ -45,7 +45,7 @@ def main():
     hexcode.append(jumpa(RJL))
     hexcode.append(addi(0, 0, -1))
     hexcode.append(jalr(imm=-9))
-    hexcode.append(loadr(U32, RSP, -12, 0))
+    hexcode.append(load(U32, RSP, -12, 0))
     hexcode.append(strm(U32, 0, RSP, -4))
     hexcode.append(addi(0, 0, -2))
     hexcode.append(jalr(imm=-13))
