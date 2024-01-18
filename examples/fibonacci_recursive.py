@@ -31,29 +31,30 @@ endif:
 """
 
 def main():
-    hexcode = []
-    hexcode.append(stri(False, 0, 8))
-    hexcode.append(jalr(imm=2))
-    hexcode.append(HALT)
-    hexcode.append(addi(RSP, RSP, 16))
-    hexcode.append(load(U32, RSP, -8, RJL))
-    hexcode.append(load(U32, RSP, -4, 0))
-    hexcode.append(stri(False, 1, 2))
-    hexcode.append(jmpif(COND_GE, False, 4, 0, 1))
-    hexcode.append(strm(U32, RJL, RSP, -8))
-    hexcode.append(addi(RSP, RSP, -16))
-    hexcode.append(jumpa(RJL))
-    hexcode.append(addi(0, 0, -1))
-    hexcode.append(jalr(imm=-9))
-    hexcode.append(load(U32, RSP, -12, 0))
-    hexcode.append(strm(U32, 0, RSP, -4))
-    hexcode.append(addi(0, 0, -2))
-    hexcode.append(jalr(imm=-13))
-    hexcode.append(strm(U32, 1, RSP, -12))
-    hexcode.append(add(0, 0, 1))
-    hexcode.append(strm(U32, RJL, RSP, -8))
-    hexcode.append(addi(RSP, RSP, -16))
-    hexcode.append(jumpa(RJL))
+    hexcode = [
+        stri(False, 0, 8),
+        jalr(imm=2),
+        HALT,
+        addi(RSP, RSP, 16),
+        load(U32, RSP, -8, RJL),
+        load(U32, RSP, -4, 0),
+        stri(False, 1, 2),
+        jmpif(COND_GE, False, 4, 0, 1),
+        strm(U32, RJL, RSP, -8),
+        addi(RSP, RSP, -16),
+        jumpa(RJL),
+        addi(0, 0, -1),
+        jalr(imm=-9),
+        load(U32, RSP, -12, 0),
+        strm(U32, 0, RSP, -4),
+        addi(0, 0, -2),
+        jalr(imm=-13),
+        strm(U32, 1, RSP, -12),
+        add(0, 0, 1),
+        strm(U32, RJL, RSP, -8),
+        addi(RSP, RSP, -16),
+        jumpa(RJL),
+    ]
     
     write_to_file(hexcode, 'fibonacci_recursive.bin')
 

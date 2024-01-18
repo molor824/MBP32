@@ -121,6 +121,14 @@ else others:
     [0:2] = 11
     if nop: # do nothing
         [2:32] = 0...0
+    if gpio: # general purpose input output
+        [2] = 1
+        if input: # read from general purpose input pins
+            [3] = 0
+            [28:32] = $rd # destination to store the inputs
+        elif output: # output to general purpose output pins
+            [3] = 1
+            [24:28] = $rs1 # source to read from
     elif halt: # stuck on same instruction
         [31] = 1
 

@@ -13,9 +13,6 @@ RZ = 0xf
 RSP = 0xe
 RJL = 0xd
 
-NOP = 0b11
-HALT = 0b11 | (1 << 31)
-
 S32 = 0b100
 S24 = 0b101
 S16 = 0b110
@@ -90,6 +87,13 @@ def setif(condition = COND_EQ, signed = False, rd = RZ, rs1 = RZ, rs2 = RZ):
     return CONDITIONAL | (int(condition) & 0b111) << 2 | bool(signed) << 7 | 1 << 5 | get_rd(rd) | get_rs1(rs1) | get_rs2(rs2)
 def setifi(condition = COND_EQ, signed = False, rd = RZ, rs1 = RZ, imm = 0):
     return setif(condition, signed, rd, rs1, 0) | get_imm(imm) | 1 << 6
+def gpin(rs1 = RZ):
+    return 0b111 | get_rs1(rs1)
+def gpout(rd = RZ):
+    return 0b111 | 1 << 3 | get_rd(rd)
+
+HALT = 0b11 | (1 << 31)
+NOP = gpin()
 
 import struct
 
